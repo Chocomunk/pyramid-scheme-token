@@ -1,1 +1,1 @@
-# pyramid-scheme-token
+# pyramid-scheme-token-api
