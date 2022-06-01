@@ -1,0 +1,22 @@
+{
+  "name": "pyramid-scheme-token-api",
+  "version": "1.0.0",
+  "description": "# TODO: See `setup_pst.sql` for design notes (heh).",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Chocomunk/pyramid-scheme-token-api.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Chocomunk/pyramid-scheme-token-api/issues"
+  },
+  "homepage": "https://github.com/Chocomunk/pyramid-scheme-token-api#readme",
+  "dependencies": {
+    "express": "^4.18.1"
+  }
+}
