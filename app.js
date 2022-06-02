@@ -18,9 +18,11 @@ function buildQuery(category, low, high) {
 
     // Use an `array.join` to build the price filter
     const prices = new Array();
-    if (low !== undefined)  prices.push(low);       // Allow '0'
-    if (high !== undefined) prices.push(high);
-    if (prices.length)  query += `WHERE ${prices.join(" AND ")}`
+    if (low !== undefined)  prices.push(`price >= ${low}`);     // Allow '0'
+    if (high !== undefined) prices.push(`price <= ${high}`);
+    if (prices.length)  query += ` WHERE ${prices.join(" AND ")}`
+
+    return query;
 }
 
 async function getDB() {
