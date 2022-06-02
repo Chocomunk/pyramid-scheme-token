@@ -16,13 +16,14 @@ function buildQuery(category, low, high) {
     // Add category filter
     if (category)   query += `AND category.name = "${category}"`;
 
-    // Use an `array.join` to build the price filter
+    // Use an `array.join` to build the price filter. Allow `0` value for prices
     const prices = new Array();
-    if (low !== undefined)  prices.push(`price >= ${low}`);     // Allow '0'
-    if (high !== undefined) prices.push(`price <= ${high}`);
+    if (low !== undefined && low !== '')    prices.push(`price >= ${low}`);
+    if (high !== undefined && high !== '')  prices.push(`price <= ${high}`);
     if (prices.length)  query += ` WHERE ${prices.join(" AND ")}`
 
-    return query;
+    console.log(query);
+    return query + ';';
 }
 
 async function getDB() {
@@ -63,6 +64,7 @@ app.get("/api/pictures", async (req, res) => {
     }
 });
 
+// TODO: Deprecate this in favor of /api/pictures
 app.get("/api/pictures/all", async (req, res) => {
     try {
         const rows = await queryDB(`
