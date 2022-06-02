@@ -51,6 +51,7 @@ async function queryDB(query) {
 const app = express();
 
 // TODO: error handling on category doesn't exist. Price out-of-range is fine.
+// NOTE: Calling /api/pictures will also serve all pictures
 app.get("/api/pictures", async (req, res) => {
     let query = buildQuery(req.query["category"], 
                             req.query["low"], req.query["high"]);
