@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/Chocomunk/pyramid-scheme-token-api#readme",
   "dependencies": {
-    "express": "^4.18.1"
+    "express": "^4.18.1",
+    "promise-mysql": "^5.2.0"
   }
 }
