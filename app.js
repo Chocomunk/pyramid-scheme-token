@@ -10,7 +10,7 @@ const QUERY_STRING = `
 `
 
 // TODO: Figure out how to non-magic-value this function
-function buildQuery(category, low, high) {
+function buildListQuery(category, low, high) {
     let query = QUERY_STRING;
 
     // Add category filter
@@ -18,12 +18,20 @@ function buildQuery(category, low, high) {
 
     // Use an `array.join` to build the price filter. Allow `0` value for prices
     const prices = new Array();
-    if (low !== undefined && low !== '')    prices.push(`price >= ${low}`);
-    if (high !== undefined && high !== '')  prices.push(`price <= ${high}`);
+    if (low !== undefined && low !== '')    prices.push(`price >= "${low}"`);
+    if (high !== undefined && high !== '')  prices.push(`price <= "${high}"`);
     if (prices.length)  query += ` WHERE ${prices.join(" AND ")}`
 
     console.log(query);
     return query + ';';
+}
+
+function buildProdQuery(prodId) {
+    return `
+        SELECT paint.id, title, artist, price, img_path, name AS category 
+        FROM (SELECT * FROM painting WHERE painting.id="${prodId}") as paint
+        JOIN category ON paint.category = category.id
+    `
 }
 
 async function getDB() {
@@ -51,10 +59,21 @@ async function queryDB(query) {
 
 const app = express();
 
+// TODO: error handling on prodId doesn't exist.
+app.get("/api/pictures/:prodId", async (req, res) => {
+    let query = buildProdQuery(req.params.prodId);
+    try {
+        const rows = await queryDB(query);
+        res.json(rows[0]);
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
 // TODO: error handling on category doesn't exist. Price out-of-range is fine.
 // NOTE: Calling /api/pictures will also serve all pictures
 app.get("/api/pictures", async (req, res) => {
-    let query = buildQuery(req.query["category"], 
+    let query = buildListQuery(req.query["category"], 
                             req.query["low"], req.query["high"]);
     try {
         const rows = await queryDB(query);
