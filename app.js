@@ -3,35 +3,44 @@
 const express = require("express");
 const mysql = require("promise-mysql");
 
-const QUERY_STRING = `
-    SELECT painting.id, title, artist, price, img_path, name AS category 
-    FROM painting 
-    JOIN category ON painting.category = category.id
-`
-
 // TODO: Figure out how to non-magic-value this function
 function buildListQuery(category, low, high) {
-    let query = QUERY_STRING;
+    const placeholders = new Array();
+    let query = `
+        SELECT painting.id, title, artist, price, img_path, name AS category 
+        FROM painting 
+        JOIN category ON painting.category = category.id
+    `;
 
     // Add category filter
-    if (category)   query += `AND category.name = "${category}"`;
+    if (category) {
+        query += `AND category.name = ?`;
+        placeholders.push(category);
+    }
 
     // Use an `array.join` to build the price filter. Allow `0` value for prices
     const prices = new Array();
-    if (low !== undefined && low !== '')    prices.push(`price >= "${low}"`);
-    if (high !== undefined && high !== '')  prices.push(`price <= "${high}"`);
+    if (low !== undefined && low !== '') {
+        prices.push(`price >= ?`);
+        placeholders.push(low);
+    }
+    if (high !== undefined && high !== '') {
+        prices.push(`price <= ?`);
+        placeholders.push(high);
+    }
     if (prices.length)  query += ` WHERE ${prices.join(" AND ")}`
 
-    console.log(query);
-    return query + ';';
+    // Return escaped sql query
+    return mysql.format(query + ';', placeholders);
 }
 
 function buildProdQuery(prodId) {
-    return `
-        SELECT paint.id, title, artist, price, img_path, name AS category 
-        FROM (SELECT * FROM painting WHERE painting.id="${prodId}") as paint
-        JOIN category ON paint.category = category.id
+    return mysql.format(
     `
+        SELECT paint.id, title, artist, price, img_path, name AS category 
+        FROM (SELECT * FROM painting WHERE painting.id=?) as paint
+        JOIN category ON paint.category = category.id
+    `, [prodId]);
 }
 
 async function getDB() {
@@ -74,7 +83,7 @@ app.get("/api/pictures/:prodId", async (req, res) => {
 // NOTE: Calling /api/pictures will also serve all pictures
 app.get("/api/pictures", async (req, res) => {
     let query = buildListQuery(req.query["category"], 
-                            req.query["low"], req.query["high"]);
+                                    req.query["low"], req.query["high"]);
     try {
         const rows = await queryDB(query);
         res.json(rows);
