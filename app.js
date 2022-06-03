@@ -2,10 +2,10 @@
 
 const express = require("express");
 const mysql = require("promise-mysql");
+const fmt = mysql.format;           // Shorthand for escape formatting
 
 // TODO: Figure out how to non-magic-value this function
 function buildListQuery(category, low, high) {
-    const placeholders = new Array();
     let query = `
         SELECT painting.id, title, artist, price, img_path, name AS category 
         FROM painting 
@@ -13,34 +13,27 @@ function buildListQuery(category, low, high) {
     `;
 
     // Add category filter
-    if (category) {
-        query += `AND category.name = ?`;
-        placeholders.push(category);
-    }
+    if (category)   query += fmt(`AND category.name = ?`, [category]);
 
     // Use an `array.join` to build the price filter. Allow `0` value for prices
     const prices = new Array();
-    if (low !== undefined && low !== '') {
-        prices.push(`price >= ?`);
-        placeholders.push(low);
-    }
-    if (high !== undefined && high !== '') {
-        prices.push(`price <= ?`);
-        placeholders.push(high);
-    }
+    if (low !== undefined && low !== '') prices.push(fmt(`price >= ?`, [low]));
+    if (high !== undefined && high !== '') prices.push(fmt(`price <= ?`, [high]));
     if (prices.length)  query += ` WHERE ${prices.join(" AND ")}`
 
     // Return escaped sql query
-    return mysql.format(query + ';', placeholders);
+    return query + ';';
 }
 
 function buildProdQuery(prodId) {
-    return mysql.format(
-    `
+    return fmt(
+        `
         SELECT paint.id, title, artist, price, img_path, name AS category 
         FROM (SELECT * FROM painting WHERE painting.id=?) as paint
         JOIN category ON paint.category = category.id
-    `, [prodId]);
+        `, 
+        [prodId]
+    );
 }
 
 async function getDB() {
