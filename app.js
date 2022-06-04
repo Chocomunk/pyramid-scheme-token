@@ -115,7 +115,7 @@ app.get("/api/pictures/:prodId", async (req, res) => {
     try {
         const rows = await queryDB(query);
         if (!rows)
-            res.status(400).send(ERRMSG_INVALID_PRODID)
+            res.status(400).send(ERRMSG_INVALID_PRODID);
         res.json(rows[0]);
     } catch (err) {
         res.status(500).send(err.message);
@@ -129,7 +129,7 @@ app.get("/api/pictures", async (req, res) => {
     try {
         const rows = await queryDB(query);
         if (!rows)
-            res.status(400).send(ERRMSG_INVALID_CATEGORY)
+            res.status(400).send(ERRMSG_INVALID_CATEGORY);
         res.json(rows);
     } catch (err) {
         res.status(500).send(err.message);
@@ -155,7 +155,7 @@ app.post("/api/buy/", async (req, res) => {
     try {
         const prod_rows = await queryDB(prod_query);
         if (!prod_rows)
-            res.status(400).send(ERRMSG_INVALID_PRODID)
+            res.status(400).send(ERRMSG_INVALID_PRODID);
 
         /* Compute the new price of the product.
             Ideally we would update the price depending on demand, but for this
@@ -192,7 +192,42 @@ app.post("/api/contact", async (req, res) => {
             res.status(500).send(err.message);
         }
     } else {
-        res.status(500).send("Missing name, email, or message field");
+        res.status(400).send("Missing name, email, or message field");
+    }
+});
+
+/** Add a review for a painting into the database. */
+app.post("/api/review/", async (req, res) => {
+    const painting = req.body.painting;
+    const name = req.body.name;
+    const message = req.body.message;
+
+    if (painting && name && message) {
+        try {
+            const qry = fmt(
+                "INSERT INTO review(painting, name, message) VALUES (?, ?, ?);",
+                [painting, name, message]
+            );
+            await queryDB(qry);
+            res.json({ message: "success" });
+        } catch (err) {
+            res.status(500).send(err.message);
+        }
+    } else {
+        res.status(400).send("Missing painting, name, or message field");
+    }
+});
+
+app.get("/api/reviews/:prodId", async (req, res) => {
+    try {
+        const qry = fmt(
+            "SELECT name, message FROM review WHERE painting = ?",
+            [req.params.prodId]
+        );
+        const rows = await queryDB(qry);
+        res.json(rows);
+    } catch (err) {
+        res.status(500).send(err.message);
     }
 });
 
