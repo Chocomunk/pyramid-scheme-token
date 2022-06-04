@@ -40,6 +40,8 @@ INSERT INTO painting(title, artist, price, img_path, category, description) VALU
 	('Flowers', 'Ivy Tang', 1000.00, 'imgs/flowers.png', 1, 'Leo vel fringilla est ullamcorper eget nulla facilisi. Sed egestas egestas fringilla phasellus faucibus scelerisque eleifend donec. Morbi tincidunt augue interdum velit euismod in. Libero nunc consequat interdum varius. Et malesuada fames ac turpis egestas sed tempus urna et. Rhoncus mattis rhoncus urna neque viverra justo nec ultrices. Pulvinar elementum integer enim neque volutpat ac tincidunt.'),
 	('The First Supper', 'Ivy Tang', 500.00, 'imgs/the-first-supper.png', 1, 'Pretium vulputate sapien nec sagittis aliquam malesuada bibendum arcu. Tellus elementum sagittis vitae et leo. Ullamcorper malesuada proin libero nunc consequat interdum varius sit. Sed blandit libero volutpat sed cras ornare arcu dui. Quam pellentesque nec nam aliquam sem et. Auctor eu augue ut lectus arcu bibendum. '),
 	('Pain', 'Ivy Tang', 750.00, 'imgs/pain.png', 4, 'Aenean euismod elementum nisi quis. Et leo duis ut diam. Enim sit amet venenatis urna cursus eget nunc scelerisque. Nec sagittis aliquam malesuada bibendum arcu. Quis imperdiet massa tincidunt nunc pulvinar sapien. Purus in mollis nunc sed id semper. Odio facilisis mauris sit amet massa vitae tortor. Dui id ornare arcu odio ut sem nulla pharetra diam.');
+	('belephant', 'Alvin On', 500.00, 'imgs/belephant.png', 3, 'Its Billy the Belephant!');
+	('color-bomb', 'Alvin On', 300.00, 'imgs/color-bomb.png', 4, 'Boom boom colors!');
 
 
 CREATE TABLE contact(
