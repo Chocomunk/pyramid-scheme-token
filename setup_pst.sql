@@ -6,6 +6,7 @@
   of painting products, painting categories, and user feedback.
 */
 
+DROP TABLE IF EXISTS review;
 DROP TABLE IF EXISTS painting;
 DROP TABLE IF EXISTS category;
 DROP TABLE IF EXISTS contact;
@@ -57,6 +58,18 @@ INSERT INTO painting(title, artist, price, img_path, category, description) VALU
 	('color-bomb', 'Alvin On', 300.00, 'imgs/color-bomb.png', 4, 'Boom boom colors!');
 
 /* Stores user-submitted feedback. Tracks user contact and their comments. */
+CREATE TABLE review(
+  id        INT             AUTO_INCREMENT,
+  painting  INT             NOT NULL,
+  name      VARCHAR(63)     NOT NULL,
+  message   TEXT            NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (painting) REFERENCES painting(id)
+);
+
+INSERT INTO review(painting, name, message) VALUES
+	('1', 'Mario Ruiz', 'Cow is cute.  Would buy again.');
+
 CREATE TABLE contact(
   id        INT             AUTO_INCREMENT,     -- 2345678
   name      VARCHAR(63)     NOT NULL,           -- move.jpg
