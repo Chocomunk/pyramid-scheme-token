@@ -1,5 +1,9 @@
 "use strict";
 
+const ERRMSG_INVALID_CATEGORY = "No pictures found under the given category.";
+const ERRMSG_INVALID_PRODID = "The provided prodId is invalid";
+const ERRMSG_BUY_PARAMS = "Parameter 'prodId' is required.";
+
 const express = require("express");
 const mysql = require("promise-mysql");
 const multer = require("multer");
@@ -71,24 +75,25 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(multer().none());
 
-// TODO: error handling on prodId doesn't exist.
 app.get("/api/pictures/:prodId", async (req, res) => {
     let query = buildProdQuery(req.params.prodId);
     try {
         const rows = await queryDB(query);
+        if (!rows)
+            res.status(400).send(ERRMSG_INVALID_PRODID)
         res.json(rows[0]);
     } catch (err) {
         res.status(500).send(err.message);
     }
 });
 
-// TODO: error handling on category doesn't exist. Price out-of-range is fine.
-// NOTE: Calling /api/pictures will also serve all pictures
 app.get("/api/pictures", async (req, res) => {
     let query = buildListQuery(req.query["category"],
         req.query["low"], req.query["high"]);
     try {
         const rows = await queryDB(query);
+        if (!rows)
+            res.status(400).send(ERRMSG_INVALID_CATEGORY)
         res.json(rows);
     } catch (err) {
         res.status(500).send(err.message);
@@ -105,9 +110,14 @@ app.get("/api/categories/", async (req, res) => {
 });
 
 app.post("/api/buy/", async (req, res) => {
+    if (!req.body.prodId)
+        res.status(400).send(ERRMSG_BUY_PARAMS);
+
     let prod_query = buildProdQuery(req.body.prodId);
     try {
         const prod_rows = await queryDB(prod_query);
+        if (!prod_rows)
+            res.status(400).send(ERRMSG_INVALID_PRODID)
 
         let art = prod_rows[0];
         let price = art.price + art.artist.length;
