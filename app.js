@@ -15,13 +15,13 @@ function buildListQuery(category, low, high) {
     `;
 
     // Add category filter
-    if (category)   query += fmt(`AND category.name = ?`, [category]);
+    if (category) query += fmt(`AND category.name = ?`, [category]);
 
     // Use an `array.join` to build the price filter. Allow `0` value for prices
     const prices = new Array();
     if (low !== undefined && low !== '') prices.push(fmt(`price >= ?`, [low]));
     if (high !== undefined && high !== '') prices.push(fmt(`price <= ?`, [high]));
-    if (prices.length)  query += ` WHERE ${prices.join(" AND ")}`
+    if (prices.length) query += ` WHERE ${prices.join(" AND ")}`;
 
     // Return escaped sql query
     return query + ';';
@@ -33,13 +33,13 @@ function buildProdQuery(prodId) {
         SELECT paint.id, title, artist, price, img_path, name AS category 
         FROM (SELECT * FROM painting WHERE painting.id=?) as paint
         JOIN category ON paint.category = category.id
-        `, 
+        `,
         [prodId]
     );
 }
 
 function buildSetPriceQuery(prodID, price) {
-    return fmt (`UPDATE painting SET price=? WHERE id=?`, [price, prodID]);
+    return fmt(`UPDATE painting SET price=? WHERE id=?`, [price, prodID]);
 }
 
 async function getDB() {
@@ -66,7 +66,6 @@ async function queryDB(query) {
 }
 
 const app = express();
-
 // for application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true })); // built-in middleware
 // for application/json
@@ -88,8 +87,8 @@ app.get("/api/pictures/:prodId", async (req, res) => {
 // TODO: error handling on category doesn't exist. Price out-of-range is fine.
 // NOTE: Calling /api/pictures will also serve all pictures
 app.get("/api/pictures", async (req, res) => {
-    let query = buildListQuery(req.query["category"], 
-                                    req.query["low"], req.query["high"]);
+    let query = buildListQuery(req.query["category"],
+        req.query["low"], req.query["high"]);
     try {
         const rows = await queryDB(query);
         res.json(rows);
@@ -125,12 +124,12 @@ app.post("/api/buy/", async (req, res) => {
     let prod_query = buildProdQuery(req.body.prodId);
     try {
         const prod_rows = await queryDB(prod_query);
-        
+
         let art = prod_rows[0];
         let price = art.price + art.artist.length;
         let price_query = buildSetPriceQuery(req.body.prodId, price);
         await queryDB(price_query);
-        
+
         art.price = price;
         res.json(art);
     } catch (err) {
@@ -138,6 +137,28 @@ app.post("/api/buy/", async (req, res) => {
     }
 });
 
+app.post("/api/contact", async (req, res) => {
+    const name = req.body.name;
+    const email = req.body.email;
+    const message = req.body.message;
+
+    if (name && email && message) {
+        try {
+            const qry = fmt(
+                "INSERT INTO contact(name, email, message) VALUES (?, ?, ?);",
+                [name, email, message]
+            );
+            await queryDB(qry);
+            res.json({ message: "success" });
+        } catch (err) {
+            res.status(500).send(err.message);
+        }
+    } else {
+        res.status(500).send("Missing name, email, or message field");
+    }
+});
+
+// serve static files
 app.use(express.static("public"));
 
 const PORT = process.env.PORT || 8000;
