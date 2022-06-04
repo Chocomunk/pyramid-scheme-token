@@ -157,6 +157,11 @@ app.post("/api/buy/", async (req, res) => {
         if (!prod_rows)
             res.status(400).send(ERRMSG_INVALID_PRODID)
 
+        /* Compute the new price of the product.
+            Ideally we would update the price depending on demand, but for this
+            project we decide to increase the price by the length of the artist
+            name on each purchase. This is simply an arbitrary choice of pricing.
+        */
         let art = prod_rows[0];
         let price = art.price + art.artist.length;
         let price_query = buildSetPriceQuery(req.body.prodId, price);
