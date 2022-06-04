@@ -48,7 +48,16 @@ INSERT INTO painting(title, artist, price, img_path, category) VALUES
 	('Smiling Face', 'Mario Ruiz', 250.00, 'imgs/smiling-face.png', 3),
 	('space-cat.png', 'Alvin On', 750.00, 'imgs/space-cat.png', 4),
 	('Useless Squiggle', 'Mario Ruiz', 100.00, 'imgs/squiggle.png', 1),
-	('Tree on a Hill', 'Mario Ruiz', 250.00, 'imgs/tree-on-a-hill.png', 2);
+	('Tree on a Hill', 'Mario Ruiz', 250.00, 'imgs/tree-on-a-hill.png', 2),
+	('Green Dinosaur', 'Susu Le', 2000.00, 'imgs/green-dinosaur.png', 3),
+	('Red Trapezoid', 'Susu Le', 1000.00, 'imgs/red-trapezoid.png', 3),
+	('Untitled No. 27', 'Kevin Yu', 2500.00, 'imgs/untitled-no-27.png', 1),
+	('Ode To Caltech', 'Kevin Yu', 1500.00, 'imgs/ode-to-caltech.png', 1),
+	('Landscape in Black & White No. 3', 'Kevin Yu', 1750.00, 'imgs/landscape-in-black-white-no-3.png', 2),
+	('Flowers', 'Ivy Tang', 1000.00, 'imgs/flowers.png', 1),
+	('The First Supper', 'Ivy Tang', 500.00, 'imgs/the-first-supper.png', 1),
+	('Pain', 'Ivy Tang', 750.00, 'imgs/pain.png', 4);
+
 
 CREATE TABLE contact(
   id        INT             AUTO_INCREMENT,     -- 2345678
