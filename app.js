@@ -8,7 +8,7 @@ const multer = require("multer");
 const fmt = mysql.format;           // Shorthand for escape formatting
 
 // Error messages
-const ERRMSG_INVALID_CATEGORY = "No pictures found under the given category.";
+const ERRMSG_INVALID_FILTER = "No pictures found under the given filters.";
 const ERRMSG_INVALID_PRODID = "The provided prodId is invalid";
 const ERRMSG_BUY_PARAMS = "Parameter 'prodId' is required.";
 
@@ -116,9 +116,9 @@ app.get("/api/pictures/:prodId", async (req, res) => {
         const rows = await queryDB(query);
         if (rows.length === 0) {
             res.status(400).send(ERRMSG_INVALID_PRODID);
-        } else {
-            res.json(rows[0]);
+            return;
         }
+        res.json(rows[0]);
     } catch (err) {
         res.status(500).send(err.message);
     }
@@ -130,8 +130,10 @@ app.get("/api/pictures", async (req, res) => {
         req.query["low"], req.query["high"]);
     try {
         const rows = await queryDB(query);
-        if (!rows)
-            res.status(400).send(ERRMSG_INVALID_CATEGORY);
+        if (!rows.length) {
+            res.status(400).send(ERRMSG_INVALID_FILTER);
+            return;
+        }
         res.json(rows);
     } catch (err) {
         res.status(500).send(err.message);
@@ -156,8 +158,10 @@ app.post("/api/buy/", async (req, res) => {
     let prod_query = buildProdQuery(req.body.prodId);
     try {
         const prod_rows = await queryDB(prod_query);
-        if (!prod_rows)
+        if (!prod_rows.length) {
             res.status(400).send(ERRMSG_INVALID_PRODID);
+            return;
+        }
 
         /* Compute the new price of the product.
             Ideally we would update the price depending on demand, but for this
