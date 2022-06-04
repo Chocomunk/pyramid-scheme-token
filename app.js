@@ -1,16 +1,26 @@
 "use strict";
 
-const ERRMSG_INVALID_CATEGORY = "No pictures found under the given category.";
-const ERRMSG_INVALID_PRODID = "The provided prodId is invalid";
-const ERRMSG_BUY_PARAMS = "Parameter 'prodId' is required.";
-
+// Imports
 const express = require("express");
 const mysql = require("promise-mysql");
 const multer = require("multer");
 
 const fmt = mysql.format;           // Shorthand for escape formatting
 
-// TODO: Figure out how to non-magic-value this function
+// Error messages
+const ERRMSG_INVALID_CATEGORY = "No pictures found under the given category.";
+const ERRMSG_INVALID_PRODID = "The provided prodId is invalid";
+const ERRMSG_BUY_PARAMS = "Parameter 'prodId' is required.";
+
+// ------------------------------ Database/Queries ------------------------------
+
+/**
+ * Build a query to get a (filtered) list of products from the database.
+ * @param {string} category The category to filter by
+ * @param {string} low The lower-bound for the price filter
+ * @param {string} high The upper-bound for the price fitler
+ * @returns The formatted and escaped sql query
+ */
 function buildListQuery(category, low, high) {
     let query = `
         SELECT painting.id, title, artist, price, img_path, name AS category, description
@@ -31,6 +41,11 @@ function buildListQuery(category, low, high) {
     return query + ';';
 }
 
+/**
+ * Build a query to get a single product entry from the database.
+ * @param {string} prodId The unique id of the product to query for
+ * @returns The formatted and escaped sql query
+ */
 function buildProdQuery(prodId) {
     return fmt(
         `
@@ -42,10 +57,20 @@ function buildProdQuery(prodId) {
     );
 }
 
+/**
+ * Updates the database to set the price of a specific product.
+ * @param {string} prodId The unique id of the product to update
+ * @param {string} price The new price to assign to the product
+ * @returns The formatted and escaped sql query
+ */
 function buildSetPriceQuery(prodID, price) {
     return fmt(`UPDATE painting SET price=? WHERE id=?`, [price, prodID]);
 }
 
+/**
+ * Attempts to connect to the 'pst' database on root@localhost.
+ * @returns The db connection
+ */
 async function getDB() {
     let database = await mysql.createConnection({
         host: "localhost",
@@ -57,6 +82,11 @@ async function getDB() {
     return database;
 }
 
+/**
+ * Executes a query against the application database.
+ * @param {string} query The query to send to the db
+ * @returns The query result
+ */
 async function queryDB(query) {
     let db;
     try {
@@ -69,12 +99,17 @@ async function queryDB(query) {
     }
 }
 
+// ------------------------------ Express Setup ------------------------------
+
 const app = express();
 // Handle post request bodies
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(multer().none());
 
+// ------------------------------ API Endpoints ------------------------------
+
+/** Query the database for a single product and return it's data. */
 app.get("/api/pictures/:prodId", async (req, res) => {
     let query = buildProdQuery(req.params.prodId);
     try {
@@ -87,6 +122,7 @@ app.get("/api/pictures/:prodId", async (req, res) => {
     }
 });
 
+/** Query the database for a list of products and return the resulting list. */
 app.get("/api/pictures", async (req, res) => {
     let query = buildListQuery(req.query["category"],
         req.query["low"], req.query["high"]);
@@ -100,6 +136,7 @@ app.get("/api/pictures", async (req, res) => {
     }
 });
 
+/** Query the database for the set of all catagories */
 app.get("/api/categories/", async (req, res) => {
     try {
         const rows = await queryDB("SELECT name FROM category;");
@@ -109,6 +146,7 @@ app.get("/api/categories/", async (req, res) => {
     }
 });
 
+/** Update a product in the database to reflect it's purchasing. */
 app.post("/api/buy/", async (req, res) => {
     if (!req.body.prodId)
         res.status(400).send(ERRMSG_BUY_PARAMS);
@@ -131,6 +169,7 @@ app.post("/api/buy/", async (req, res) => {
     }
 });
 
+/** Add a feedback entry into the database. */
 app.post("/api/contact", async (req, res) => {
     const name = req.body.name;
     const email = req.body.email;
@@ -151,6 +190,8 @@ app.post("/api/contact", async (req, res) => {
         res.status(500).send("Missing name, email, or message field");
     }
 });
+
+// ------------------------------ Main ------------------------------
 
 // serve static files
 app.use(express.static("public"));
