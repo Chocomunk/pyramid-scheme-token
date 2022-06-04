@@ -9,7 +9,7 @@ const fmt = mysql.format;           // Shorthand for escape formatting
 // TODO: Figure out how to non-magic-value this function
 function buildListQuery(category, low, high) {
     let query = `
-        SELECT painting.id, title, artist, price, img_path, name AS category 
+        SELECT painting.id, title, artist, price, img_path, name AS category, description
         FROM painting 
         JOIN category ON painting.category = category.id
     `;
@@ -30,7 +30,7 @@ function buildListQuery(category, low, high) {
 function buildProdQuery(prodId) {
     return fmt(
         `
-        SELECT paint.id, title, artist, price, img_path, name AS category 
+        SELECT paint.id, title, artist, price, img_path, name AS category, description
         FROM (SELECT * FROM painting WHERE painting.id=?) as paint
         JOIN category ON paint.category = category.id
         `,
@@ -66,12 +66,10 @@ async function queryDB(query) {
 }
 
 const app = express();
-// for application/x-www-form-urlencoded
-app.use(express.urlencoded({ extended: true })); // built-in middleware
-// for application/json
-app.use(express.json()); // built-in middleware
-// for multipart/form-data (required with FormData)
-app.use(multer().none()); // requires the "multer" module
+// Handle post request bodies
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(multer().none());
 
 // TODO: error handling on prodId doesn't exist.
 app.get("/api/pictures/:prodId", async (req, res) => {
@@ -91,20 +89,6 @@ app.get("/api/pictures", async (req, res) => {
         req.query["low"], req.query["high"]);
     try {
         const rows = await queryDB(query);
-        res.json(rows);
-    } catch (err) {
-        res.status(500).send(err.message);
-    }
-});
-
-// TODO: Deprecate this in favor of /api/pictures
-app.get("/api/pictures/all", async (req, res) => {
-    try {
-        const rows = await queryDB(`
-            SELECT painting.id, title, artist, price, img_path, name AS category 
-            FROM painting 
-            JOIN category ON painting.category = category.id;
-        `);
         res.json(rows);
     } catch (err) {
         res.status(500).send(err.message);
