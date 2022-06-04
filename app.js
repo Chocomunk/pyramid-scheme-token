@@ -2,6 +2,8 @@
 
 const express = require("express");
 const mysql = require("promise-mysql");
+const multer = require("multer");
+
 const fmt = mysql.format;           // Shorthand for escape formatting
 
 // TODO: Figure out how to non-magic-value this function
@@ -36,6 +38,10 @@ function buildProdQuery(prodId) {
     );
 }
 
+function buildSetPriceQuery(prodID, price) {
+    return fmt (`UPDATE painting SET price=? WHERE id=?`, [price, prodID]);
+}
+
 async function getDB() {
     let database = await mysql.createConnection({
         host: "localhost",
@@ -60,6 +66,13 @@ async function queryDB(query) {
 }
 
 const app = express();
+
+// for application/x-www-form-urlencoded
+app.use(express.urlencoded({ extended: true })); // built-in middleware
+// for application/json
+app.use(express.json()); // built-in middleware
+// for multipart/form-data (required with FormData)
+app.use(multer().none()); // requires the "multer" module
 
 // TODO: error handling on prodId doesn't exist.
 app.get("/api/pictures/:prodId", async (req, res) => {
@@ -103,6 +116,23 @@ app.get("/api/categories/", async (req, res) => {
     try {
         const rows = await queryDB("SELECT name FROM category;");
         res.json(rows.map(row => row["name"]));
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
+app.post("/api/buy/", async (req, res) => {
+    let prod_query = buildProdQuery(req.body.prodId);
+    try {
+        const prod_rows = await queryDB(prod_query);
+        
+        let art = prod_rows[0];
+        let price = art.price + art.artist.length;
+        let price_query = buildSetPriceQuery(req.body.prodId, price);
+        await queryDB(price_query);
+        
+        art.price = price;
+        res.json(art);
     } catch (err) {
         res.status(500).send(err.message);
     }
