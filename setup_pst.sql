@@ -18,6 +18,7 @@
 
 DROP TABLE IF EXISTS painting;
 DROP TABLE IF EXISTS category;
+DROP TABLE IF EXISTS contact;
 
 CREATE TABLE category(
     id      INT             PRIMARY KEY,
@@ -48,3 +49,15 @@ INSERT INTO painting(title, artist, price, img_path, category) VALUES
 	('space-cat.png', 'Alvin On', 750.00, 'imgs/space-cat.png', 4),
 	('Useless Squiggle', 'Mario Ruiz', 100.00, 'imgs/squiggle.png', 1),
 	('Tree on a Hill', 'Mario Ruiz', 250.00, 'imgs/tree-on-a-hill.png', 2);
+
+CREATE TABLE contact(
+  id        INT             AUTO_INCREMENT,     -- 2345678
+  name      VARCHAR(63)     NOT NULL,           -- move.jpg
+  email     VARCHAR(63)     NOT NULL,           -- Alvin On
+  message   TEXT            NOT NULL,           -- 999.99
+  PRIMARY KEY (id)
+);
+
+INSERT INTO contact(name, email, message) VALUES
+	('Mario Ruiz', 'mjruiz@caltech.edu', 'This website is a total scam.  Very bad!'),
+	('Alvin On', 'aon@caltech.edu', 'chungus');
