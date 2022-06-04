@@ -57,7 +57,10 @@ INSERT INTO painting(title, artist, price, img_path, category, description) VALU
 	('belephant', 'Alvin On', 500.00, 'imgs/belephant.png', 3, 'Its Billy the Belephant!'),
 	('color-bomb', 'Alvin On', 300.00, 'imgs/color-bomb.png', 4, 'Boom boom colors!');
 
-/* Stores user-submitted feedback. Tracks user contact and their comments. */
+/* 
+  Stores user reviews for product. Stores the user's name, their review 
+  message, and the id of the product they reviewed. 
+*/
 CREATE TABLE review(
   id        INT             AUTO_INCREMENT,
   painting  INT             NOT NULL,
@@ -70,6 +73,7 @@ CREATE TABLE review(
 INSERT INTO review(painting, name, message) VALUES
 	('1', 'Mario Ruiz', 'Cow is cute.  Would buy again.');
 
+/* Stores user-submitted feedback. Tracks user contact and their comments. */
 CREATE TABLE contact(
   id        INT             AUTO_INCREMENT,     -- 2345678
   name      VARCHAR(63)     NOT NULL,           -- move.jpg
